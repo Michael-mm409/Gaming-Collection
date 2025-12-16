@@ -1,0 +1,56 @@
+{% extends 'base/base.html' %}
+{% block title %}Add Game{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2>Add Game</h2>
+    <form method="post" class="row g-3 mb-4">
+        <div class="col-md-2">
+            <input name="title" class="form-control" placeholder="Game Title" required>
+        </div>
+        <div class="col-md-2">
+            <select name="platform_id" class="form-control" required>
+                {% for platform in platforms %}
+                <option value="{{ platform.id }}">{{ platform.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-1">
+            <input name="cost" class="form-control" placeholder="Cost" type="number" step="0.01">
+        </div>
+        <div class="col-md-2">
+            <select name="status_id" class="form-control">
+                <option value="">Status</option>
+                {% for status in statuses %}
+                <option value="{{ status.id }}">{{ status.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-1">
+            <select name="ownership_id" class="form-control">
+                <option value="">Ownership</option>
+                {% for ownership in ownerships %}
+                <option value="{{ ownership.id }}">{{ ownership.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="digital_physical_id" class="form-control">
+                <option value="">Digital/Physical</option>
+                {% for dp in digital_physical_options %}
+                <option value="{{ dp.id }}">{{ dp.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input name="image_url" class="form-control" placeholder="Image URL">
+        </div>
+        <div class="col-md-12">
+            <textarea name="notes" class="form-control" placeholder="Notes"></textarea>
+        </div>
+        <div class="col-md-12">
+            <button type="submit" class="btn btn-primary">Add Game</button>
+            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

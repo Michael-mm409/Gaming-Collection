@@ -1,0 +1,104 @@
+{% extends 'base/base.html' %}
+{% block title %}Peripherals{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <a href="/" class="btn btn-secondary mb-3">Back to Dashboard</a>
+    <h1 class="mb-4">Peripherals</h1>
+    <form action="{{ url_for('main.peripherals') }}" method="post" class="row g-3 mb-4">
+        <div class="col-md-2">
+            <input type="text" name="name" class="form-control" placeholder="Peripheral Name" required>
+        </div>
+        <div class="col-md-2">
+            <select name="peripheral_type" class="form-control">
+                <option value="">Type</option>
+                <option value="Console">Console</option>
+                <option value="Controller">Controller</option>
+                <option value="Charger">Charger</option>
+                <option value="Headphones">Headphones</option>
+                <option value="Storage">Storage</option>
+                <option value="Cable">Cable</option>
+                <option value="Adapter">Adapter</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="platform_id" class="form-control" required>
+                <option value="">Platform</option>
+                {% for platform in platforms %}
+                <option value="{{ platform.id }}">{{ platform.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="platform_type" class="form-control">
+                <option value="">Platform Type</option>
+                <option value="General">General</option>
+                <option value="PS5">PS5</option>
+                <option value="PS4">PS4</option>
+                <option value="Xbox">Xbox</option>
+                <option value="Switch">Switch</option>
+                <option value="PC">PC</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div class="col-md-1">
+            <input type="number" step="0.01" name="cost" class="form-control" placeholder="Cost">
+        </div>
+        <div class="col-md-1">
+            <input type="number" name="quantity" class="form-control" placeholder="Qty">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="purchased_from" class="form-control" placeholder="Purchased From">
+        </div>
+        <div class="col-md-2">
+            <select name="ownership_id" class="form-control">
+                <option value="">Ownership</option>
+                {% for ownership in ownerships %}
+                <option value="{{ ownership.id }}">{{ ownership.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input name="notes" class="form-control" placeholder="Notes">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Add Peripheral</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Platform Type</th>
+                <th>Cost</th>
+                <th>Quantity</th>
+                <th>Purchased From</th>
+                <th>Ownership</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for peripheral in peripherals %}
+            <tr>
+                <td>{{ peripheral.name }}</td>
+                <td>{{ peripheral.peripheral_type or '' }}</td>
+                <td>{{ peripheral.platform_type or '' }}</td>
+                <td>${{ '%.2f'|format(peripheral.cost or 0) }}</td>
+                <td>{{ peripheral.quantity or '' }}</td>
+                <td>{{ peripheral.purchased_from or '' }}</td>
+                <td>{{ peripheral.ownership.name if peripheral.ownership else '' }}</td>
+                <td>{{ peripheral.notes or '' }}</td>
+                <td>
+                    <a href="{{ url_for('main.edit_peripheral', peripheral_id=peripheral.id) }}" class="btn btn-sm btn-secondary">Edit</a>
+                    <form action="{{ url_for('main.delete_peripheral', peripheral_id=peripheral.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this peripheral?');">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

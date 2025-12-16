@@ -1,0 +1,25 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<h2>Add Platform</h2>
+<form method="post">
+    <div class="mb-3"><label>Name: <input type="text" name="name" class="form-control" required></label></div>
+    <div class="mb-3"><label>Manufacturer: <input type="text" name="manufacturer" class="form-control"></label></div>
+    <div class="mb-3"><label>Release Year: <input type="number" name="release_year" class="form-control"></label></div>
+    <div class="mb-3"><label>Generation: <input type="text" name="generation" class="form-control"></label></div>
+    <div class="mb-3"><label>Description: <textarea name="description" class="form-control"></textarea></label></div>
+    <div class="mb-3"><label>Cost: <input type="number" step="0.01" name="cost" class="form-control"></label></div>
+    <div class="mb-3"><label>Quantity: <input type="number" name="quantity" class="form-control"></label></div>
+    <div class="mb-3"><label>Purchased From: <input type="text" name="purchased_from" class="form-control"></label></div>
+    <div class="mb-3"><label>Ownership:
+        <select name="ownership_id" class="form-control">
+            <option value="">--</option>
+            {% for o in ownerships %}
+            <option value="{{ o.id }}">{{ o.name }}</option>
+            {% endfor %}
+        </select>
+    </label></div>
+    <div class="mb-3"><label>Notes: <textarea name="notes" class="form-control"></textarea></label></div>
+    <button type="submit" class="btn btn-primary">Add Platform</button>
+    <a href="{{ url_for('main.platforms') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

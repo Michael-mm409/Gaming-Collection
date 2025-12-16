@@ -1,0 +1,20 @@
+{% extends 'base/base.html' %}
+{% block title %}Reset Database{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2>Reset Database</h2>
+    {% if message %}
+        <div class="alert alert-success">{{ message }}</div>
+        <a href="/" class="btn btn-primary">Back to Dashboard</a>
+    {% else %}
+        <div class="alert alert-danger">
+            <strong>Warning:</strong> This will delete <b>all games and categories</b> and reseed the default categories. This cannot be undone.<br>
+            Are you sure you want to reset the database?
+        </div>
+        <form method="post">
+            <button type="submit" class="btn btn-danger">Yes, Reset Database</button>
+            <a href="/" class="btn btn-secondary">Cancel</a>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

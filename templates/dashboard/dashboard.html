@@ -1,0 +1,243 @@
+{% extends 'base/base.html' %}
+{% block title %}Game Collection Dashboard{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Default: first platform in the first brand tab
+    let defaultPlatform = null;
+    const brandTabsContent = document.getElementById('brandTabsContent');
+    if (brandTabsContent) {
+        const firstTable = brandTabsContent.querySelector('.tab-pane.active table tbody');
+        if (firstTable) {
+            const firstRow = firstTable.querySelector('tr');
+            if (firstRow) {
+                defaultPlatform = firstRow.children[0].innerText.trim();
+            }
+        }
+    }
+
+    function getActivePlatform() {
+        // Find the active tab-pane
+        const activePane = document.querySelector('.tab-pane.active');
+        if (!activePane) return defaultPlatform;
+        // Find the selected row (if you want to allow row selection), else just use the first row
+        const firstRow = activePane.querySelector('table tbody tr');
+        if (firstRow) {
+            return firstRow.children[0].innerText.trim();
+        }
+        return defaultPlatform;
+    }
+
+    function updateButton() {
+        const platform = getActivePlatform();
+        const btn = document.getElementById('viewAddGamesBtn');
+        if (platform) {
+            btn.href = '/collection/' + encodeURIComponent(platform.toLowerCase());
+            btn.classList.remove('disabled');
+        } else {
+            btn.href = '#';
+            btn.classList.add('disabled');
+        }
+    }
+
+    // Update on tab change
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tabBtn => {
+        tabBtn.addEventListener('shown.bs.tab', updateButton);
+    });
+
+    // Initial update
+    updateButton();
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4 summary-header">Game Collection Dashboard</h1>
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title summary-header">Total Games</h5>
+                    <p class="display-6">{{ total_games }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title summary-header">Total Cost</h5>
+                    <p class="display-6">${{ '%.2f'|format(total_cost) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title summary-header">Peripherals</h5>
+                    <p class="display-6">{{ total_peripherals }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title summary-header">Peripherals Cost</h5>
+                    <p class="display-6">${{ '%.2f'|format(total_peripherals_cost) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title summary-header">Category Breakdown</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="summary-header">Status</div>
+                            <ul class="list-group summary-table">
+                                {% for k, v in status_counts.items() %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">{{ k }}<span class="badge bg-primary rounded-pill">{{ v }}</span></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-header">Digital/Physical</div>
+                            <ul class="list-group summary-table">
+                                {% for k, v in digital_counts.items() %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">{{ k }}<span class="badge bg-primary rounded-pill">{{ v }}</span></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-header">Ownership</div>
+                            <ul class="list-group summary-table">
+                                {% for k, v in ownership_counts.items() %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">{{ k }}<span class="badge bg-primary rounded-pill">{{ v }}</span></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a  href=/admin/platforms class="btn btn-primary">Manage Platforms</a><br/></br>
+
+    <!-- Global Peripherals Table -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title summary-header mb-0">All Peripherals</h5>
+                        <a href="/peripherals" class="btn btn-success btn-sm">View Peripherals</a>
+                    </div>
+                    <table class="table table-sm table-spreadsheet peripherals-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Platform Type</th>
+                                <th>Cost</th>
+                                <th>Quantity</th>
+                                <th>Purchased From</th>
+                                <th>Ownership</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for peripheral in peripherals %}
+                            <tr>
+                                <td>{{ peripheral.name }}</td>
+                                <td>{{ peripheral.peripheral_type or '' }}</td>
+                                <td>{{ peripheral.platform_type or '' }}</td>
+                                <td>${{ '%.2f'|format(peripheral.cost or 0) }}</td>
+                                <td>{{ peripheral.quantity or '' }}</td>
+                                <td>{{ peripheral.purchased_from or '' }}</td>
+                                <td>{{ peripheral.ownership.name if peripheral.ownership else '' }}</td>
+                                <td>{{ peripheral.notes or '' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mb-4">
+        <ul class="nav nav-tabs" id="brandTabs" role="tablist">
+            {% for brand in brand_platform_stats.keys() %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if loop.first %}active{% endif %}" id="tab-{{ brand|replace(' ', '') }}" data-bs-toggle="tab" data-bs-target="#{{ brand|replace(' ', '') }}" type="button" role="tab">{{ brand }}</button>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="tab-content" id="brandTabsContent">
+            {% for brand, plats in brand_platform_stats.items() %}
+            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="{{ brand|replace(' ', '') }}" role="tabpanel">
+                <h4 class="mt-3 brand-header">{{ brand }}</h4>
+                <table class="table table-sm table-bordered table-spreadsheet">
+                    <thead>
+                        <tr>
+                            <th>Platform</th>
+                            <th>Total</th>
+                            <th>Cost</th>
+                            {% for s in statuses %}<th>{{ s.name }}</th>{% endfor %}
+                            {% for d in digital_physical_options %}<th>{{ d.name }}</th>{% endfor %}
+                            {% for o in ownerships %}<th>{{ o.name }}</th>{% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plat, stats in plats.items() %}
+                        <tr>
+                            <td>{{ plat }}</td>
+                            <td>{{ stats.total }}</td>
+                            <td>${{ '%.2f'|format(stats.cost) }}</td>
+                            {% for s in statuses %}<td>{{ stats.status_counts[s.name] }}</td>{% endfor %}
+                            {% for d in digital_physical_options %}<td>{{ stats.digital_counts[d.name] }}</td>{% endfor %}
+                            {% for o in ownerships %}<td>{{ stats.ownership_counts[o.name] }}</td>{% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <!-- Global Playing/Backlog Tables -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="playing-backlog-header">Playing (All Platforms)</h5>
+                        <table class="table table-sm table-spreadsheet">
+                            <thead><tr><th>Platform</th><th>Title</th></tr></thead>
+                            <tbody>
+                                {% for game in games %}
+                                    {% if game.status and game.status.name|lower == 'playing' %}
+                                    <tr><td>{{ game.platform.name if game.platform else '' }}</td><td>{{ game.title }}</td></tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="playing-backlog-header">Backlog (All Platforms)</h5>
+                        <table class="table table-sm table-spreadsheet">
+                            <thead><tr><th>Platform</th><th>Title</th></tr></thead>
+                            <tbody>
+                                {% for game in games %}
+                                    {% if game.status and game.status.name|lower == 'backlog' %}
+                                    <tr><td>{{ game.platform.name if game.platform else '' }}</td><td>{{ game.title }}</td></tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <a href="/collection" class="btn btn-primary" id="viewAddGamesBtn">View/Add Games</a>
+    <a href="/reset_db" class="btn btn-danger ms-2">Reset Database</a>
+</div>
+{% endblock %}

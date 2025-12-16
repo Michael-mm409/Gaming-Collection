@@ -1,0 +1,302 @@
+{% extends 'base/base.html' %}
+{% block title %}Game Collection{% endblock %}
+{% block head %}
+<style>
+    .tabs { display: flex; margin-bottom: 1em; }
+    .tab { margin-right: 1em; padding: 0.5em 1em; border: 1px solid #ccc; border-bottom: none; background: #eee; cursor: pointer; }
+    .tab.active { background: #fff; font-weight: bold; border-bottom: 1px solid #fff; }
+    .tab a { text-decoration: none; color: inherit; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 0.5em; }
+</style>
+<script>
+    function updateFormFields() {
+        var type = document.getElementById('typeSelect').value;
+        var gameFields = document.querySelectorAll('.game-field');
+        var peripheralFields = document.querySelectorAll('.peripheral-field');
+        var heading = document.getElementById('addHeading');
+        var platform = "{{ selected_platform.name }}";
+        if (type === 'game') {
+            gameFields.forEach(f => f.style.display = '');
+            peripheralFields.forEach(f => f.style.display = 'none');
+            heading.textContent = "Add Game to " + platform;
+        } else {
+            gameFields.forEach(f => f.style.display = 'none');
+            peripheralFields.forEach(f => f.style.display = '');
+            heading.textContent = "Add Peripheral to " + platform;
+        }
+    }
+    document.getElementById('typeSelect').addEventListener('change', updateFormFields);
+    // Run once on page load:
+    updateFormFields();
+</script>
+{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+    <h1 class="mb-4">My Game Collection</h1>
+    <div class="mb-3">
+        <a href="/import" class="btn btn-success btn-sm me-2">Import from CSV</a>
+        <a href="/reset_db" class="btn btn-danger btn-sm me-2">Reset Database</a>
+        <a href="/admin/platforms" class="btn btn-outline-secondary btn-sm me-2">Manage Platforms</a>
+        <a href="/admin/statuses" class="btn btn-outline-secondary btn-sm me-2">Manage Statuses</a>
+        <a href="/admin/ownerships" class="btn btn-outline-secondary btn-sm me-2">Manage Ownerships</a>
+        <a href="/admin/digitalphysical" class="btn btn-outline-secondary btn-sm">Manage Digital/Physical</a>
+    </div>
+    <div class="tabs">
+        {% for platform in platforms %}
+            <div class="tab {% if selected_platform and selected_platform.id == platform.id %}active{% endif %}">
+                <a href="/collection/{{ platform.name|lower }}">{{ platform.name }}</a>
+            </div>
+        {% endfor %}
+    </div>
+    {% if selected_platform %}
+        {% if selected_platform.name.lower() == 'peripherals' %}
+            <!-- Add Peripheral Form -->
+            <h2>Add Peripheral to {{ selected_platform.name }}</h2>
+            <form action="{{ url_for('main.add_peripheral') }}" method="post" class="row g-3 mb-4" id="addPeripheralForm">
+                <input type="text" name="title" class="form-control" placeholder="Peripheral Title">
+                <input type="hidden" name="platform_id" value="{{ selected_platform.id }}">
+                <div class="col-md-2">
+                    <select name="peripheral_type" class="form-control">
+                        <option value="">Peripheral Type</option>
+                        <option value="Console">Console</option>
+                        <option value="Controller">Controller</option>
+                        <option value="Charger">Charger</option>
+                        <option value="Headphones">Headphones</option>
+                        <option value="Storage">Storage</option>
+                        <option value="Cable">Cable</option>
+                        <option value="Adapter">Adapter</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="platform_type" class="form-control">
+                        <option value="">Platform Type</option>
+                        <option value="General">General</option>
+                        <option value="PS5">PS5</option>
+                        <option value="PS4">PS4</option>
+                        <option value="Xbox">Xbox</option>
+                        <option value="Switch">Switch</option>
+                        <option value="PC">PC</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" step="0.01" name="cost" class="form-control" placeholder="Cost">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="quantity" class="form-control" placeholder="Quantity">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" name="purchased_from" class="form-control" placeholder="Purchased From">
+                </div>
+                <div class="col-md-2">
+                    <select name="ownership_id" class="form-control">
+                        <option value="">Ownership</option>
+                        {% for ownership in ownerships %}
+                        <option value="{{ ownership.id }}">{{ ownership.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input name="notes" class="form-control" placeholder="Notes">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">Add Peripheral</button>
+                </div>
+            </form>
+        {% else %}
+            <!-- Add Game Form -->
+            <h2>Add Game to {{ selected_platform.name }}</h2>
+            <form action="{{ url_for('main.add_game') }}" method="post" class="row g-3 mb-4" id="addGameForm">
+                <input type="hidden" name="platform_id" value="{{ selected_platform.id }}">
+                <div class="col-md-2">
+                    <input type="text" name="title" class="form-control" placeholder="Game Title">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" step="0.01" name="cost" class="form-control" placeholder="Cost">
+                </div>
+                <div class="col-md-2">
+                    <select name="grade" class="form-control">
+                        <option value="">Grade</option>
+                        <option value="Boxed">Boxed</option>
+                        <option value="Boxed/Digital">Boxed/Digital</option>
+                        <option value="Digital">Digital</option>
+                        <option value="New">New</option>
+                        <option value="Preowned">Preowned</option>
+                        <option value="Want">Want</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="status_id" class="form-control">
+                        <option value="">Status</option>
+                        {% for status in statuses %}
+                        <option value="{{ status.id }}">{{ status.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="ownership_id" class="form-control">
+                        <option value="">Ownership</option>
+                        {% for ownership in ownerships %}
+                        <option value="{{ ownership.id }}">{{ ownership.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="digital_physical_id" class="form-control">
+                        <option value="">Digital/Physical</option>
+                        {% for dp in digital_physical_options %}
+                        <option value="{{ dp.id }}">{{ dp.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input name="notes" class="form-control" placeholder="Notes">
+                </div>
+                <div class="col-md-2">
+                    <input name="image_url" class="form-control" placeholder="Image URL (optional)">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">Add Game</button>
+                </div>
+            </form>
+        {% endif %}
+
+        {% if selected_platform %}
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h5 class="playing-backlog-header">Playing</h5>
+                <table class="table table-sm table-spreadsheet">
+                    <thead><tr><th>Title</th></tr></thead>
+                    <tbody>
+                        {% for game in games %}
+                            {% if game.status and game.status.name|lower == 'playing' %}
+                            <tr><td>{{ game.title }}</td></tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5 class="playing-backlog-header">Backlog</h5>
+                <table class="table table-sm table-spreadsheet">
+                    <thead><tr><th>Title</th></tr></thead>
+                    <tbody>
+                        {% for game in games %}
+                            {% if game.status and game.status.name|lower == 'backlog' %}
+                            <tr><td>{{ game.title }}</td></tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+
+    {% if selected_platform %}
+        {% if selected_platform.name.lower() == 'peripherals' %}
+            <h2>Peripherals for {{ selected_platform.name }}</h2>
+            <table class="table table-striped table-spreadsheet">
+                <thead>
+                    <tr>
+                        <th>Ownership</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Cost</th>
+                        <th>Quantity</th>
+                        <th>Purchased From</th>
+                        <th>Notes</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for peripheral in peripherals %}
+                    <tr>
+                        <td>{{ peripheral.ownership.name if peripheral.ownership else '' }}</td>
+                        <td>{{ peripheral.name }}</td>
+                        <td>{{ peripheral.peripheral_type or '' }}</td>
+                        <td>${{ '%.2f'|format(peripheral.cost or 0) }}</td>
+                        <td>{{ peripheral.quantity or '' }}</td>
+                        <td>{{ peripheral.purchased_from or '' }}</td>
+                        <td>{{ peripheral.notes }}</td>
+                        <td>
+                            <a href="{{ url_for('main.edit_peripheral', peripheral_id=peripheral.id) }}" class="btn btn-sm btn-secondary">Edit</a>
+                            <form action="{{ url_for('main.delete_peripheral', peripheral_id=peripheral.id) }}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this peripheral?');">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <!-- Grade Filter Dropdown -->
+            <form method="get" id="gradeFilterForm" class="mb-2">
+                <div class="row g-2 align-items-center">
+                    <div class="col-auto">
+                        <label for="gradeFilter" class="form-label mb-0">Filter by Grade:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select name="grade" id="gradeFilter" class="form-select form-select-sm" onchange="document.getElementById('gradeFilterForm').submit();">
+                            <option value="">All</option>
+                            <option value="Boxed" {% if request.args.get('grade') == 'Boxed' %}selected{% endif %}>Boxed</option>
+                            <option value="Boxed/Digital" {% if request.args.get('grade') == 'Boxed/Digital' %}selected{% endif %}>Boxed/Digital</option>
+                            <option value="Digital" {% if request.args.get('grade') == 'Digital' %}selected{% endif %}>Digital</option>
+                            <option value="New" {% if request.args.get('grade') == 'New' %}selected{% endif %}>New</option>
+                            <option value="Preowned" {% if request.args.get('grade') == 'Preowned' %}selected{% endif %}>Preowned</option>
+                            <option value="Want" {% if request.args.get('grade') == 'Want' %}selected{% endif %}>Want</option>
+                            <option value="Loose" {% if request.args.get('grade') == 'Loose' %}selected{% endif %}>Loose</option>
+                            <option value="Other" {% if request.args.get('grade') == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+            <h2>Games for {{ selected_platform.name }}</h2>
+            <table class="table table-striped table-spreadsheet">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Cost</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Ownership</th>
+                        <th>Digital/Physical</th>
+                        <th>Notes</th>
+                        <th>Image</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in games %}
+                        {% if not request.args.get('grade') or (game.grade == request.args.get('grade')) %}
+                    <tr>
+                        <td>{{ game.title }}</td>
+                        <td>${{ '%.2f'|format(game.cost or 0) }}</td>
+                        <td>{{ game.grade or '' }}</td>
+                        <td>{{ game.status.name if game.status else '' }}</td>
+                        <td>{{ game.ownership.name if game.ownership else '' }}</td>
+                        <td>{{ game.digital_physical.name if game.digital_physical else '' }}</td>
+                        <td>{{ game.notes }}</td>
+                        <td>
+                            {% if game.image_url %}
+                                <img src="{{ game.image_url }}" alt="Image" class="game-img">
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('main.edit_game', game_id=game.id) }}" class="btn btn-sm btn-secondary">Edit</a>
+                            <form action="{{ url_for('main.delete_game', game_id=game.id) }}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this game?');">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

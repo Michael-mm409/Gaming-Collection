@@ -1,0 +1,1 @@
+This folder contains templates related to platform management and editing.

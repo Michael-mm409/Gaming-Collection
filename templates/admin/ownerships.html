@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Ownerships</h2>
+    <form method="post" class="mb-3">
+        <input type="hidden" name="action" value="add">
+        <div class="input-group">
+            <input type="text" name="name" class="form-control" placeholder="Add new ownership" required>
+            <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead><tr><th>Ownership</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for ownership in ownerships %}
+        <tr>
+            <form method="post">
+                <td>
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="ownership_id" value="{{ ownership.id }}">
+                    <input type="text" name="name" value="{{ ownership.name }}" class="form-control" required>
+                </td>
+                <td>
+                    <button type="submit" class="btn btn-sm btn-success">Save</button>
+            </form>
+            <form method="post" style="display:inline-block">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="ownership_id" value="{{ ownership.id }}">
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this ownership?')">Delete</button>
+            </form>
+                </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <a href="/" class="btn btn-secondary">Back to Home</a>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base/base.html' %}
+{% block title %}Edit Game{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2>Edit Game</h2>
+    <form method="post" class="row g-3 mb-4">
+        <div class="col-md-2">
+            <input name="title" class="form-control" placeholder="Game Title" value="{{ game.title }}" required>
+        </div>
+        <div class="col-md-2">
+            <select name="platform_id" class="form-control" required>
+                {% for platform in platforms %}
+                <option value="{{ platform.id }}" {% if game.platform_id == platform.id %}selected{% endif %}>{{ platform.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-1">
+            <input name="cost" class="form-control" placeholder="Cost" type="number" step="0.01" value="{{ game.cost }}">
+        </div>
+        <div class="col-md-2">
+            <select name="status_id" class="form-control">
+                <option value="">Status</option>
+                {% for status in statuses %}
+                <option value="{{ status.id }}" {% if game.status_id == status.id %}selected{% endif %}>{{ status.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-1">
+            <select name="ownership_id" class="form-control">
+                <option value="">Ownership</option>
+                {% for ownership in ownerships %}
+                <option value="{{ ownership.id }}" {% if game.ownership_id == ownership.id %}selected{% endif %}>{{ ownership.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="digital_physical_id" class="form-control">
+                <option value="">Digital/Physical</option>
+                {% for dp in digital_physical_options %}
+                <option value="{{ dp.id }}" {% if game.digital_physical_id == dp.id %}selected{% endif %}>{{ dp.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input name="notes" class="form-control" placeholder="Notes" value="{{ game.notes }}">
+        </div>
+        <div class="col-md-1">
+            <select name="grade" class="form-control">
+                <option value="">Grade</option>
+                <option value="Boxed" {% if game.grade == 'Boxed' %}selected{% endif %}>Boxed</option>
+                <option value="Digital" {% if game.grade == 'Digital' %}selected{% endif %}>Digital</option>
+                <option value="Want" {% if game.grade == 'Want' %}selected{% endif %}>Want</option>
+                <option value="Loose" {% if game.grade == 'Loose' %}selected{% endif %}>Loose</option>
+                <option value="Other" {% if game.grade == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input name="image_url" class="form-control" placeholder="Image URL (optional)" value="{{ game.image_url if game.image_url else '' }}">
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-success w-100">Save</button>
+        </div>
+    </form>
+    <a href="#" class="btn btn-secondary" id="back-to-collection">Back to Collection</a>
+</div>
+<script>
+// Store last viewed platform in a cookie when coming from collection
+document.addEventListener('DOMContentLoaded', function() {
+    // Set cookie if platform is present in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const platform = urlParams.get('platform_name') || '{{ game.platform.name if game.platform else "" }}';
+    if (platform) {
+        document.cookie = `last_platform=${platform}; path=/; max-age=2592000`;
+    }
+    // Back button uses cookie
+    document.getElementById('back-to-collection').addEventListener('click', function(e) {
+        e.preventDefault();
+        let platform = '';
+        document.cookie.split(';').forEach(function(cookie) {
+            const [k, v] = cookie.trim().split('=');
+            if (k === 'last_platform') platform = v;
+        });
+        if (platform) {
+            window.location.href = `/collection/${decodeURIComponent(platform)}`;
+        } else {
+            window.location.href = '/collection';
+        }
+    });
+});
+</script>
+</div>
+{% endblock %}

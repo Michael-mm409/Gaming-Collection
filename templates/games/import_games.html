@@ -1,0 +1,32 @@
+{% extends 'base/base.html' %}
+{% block title %}Import Games from CSV{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2>Import Games from CSV</h2>
+    {% if message %}
+    <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" class="mb-4">
+        <div class="mb-3">
+            <label for="platform_id" class="form-label">Select Platform for All Imported Games</label>
+            <select name="platform_id" id="platform_id" class="form-control" required>
+                <option value="">-- Select Platform --</option>
+                {% for platform in platforms %}
+                <option value="{{ platform.id }}">{{ platform.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <input type="file" name="csvfile" accept=".csv" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Import</button>
+    </form>
+    <div class="alert alert-info">
+        <strong>CSV Format:</strong> The file should have columns: <code>Title,Platform,Cost,Status,Ownership,Digital/Physical,Grade,Notes,Image URL</code>.<br>
+        <b>Grade</b> is optional and can be Boxed, Digital, Want, etc.<br>
+        Platform, Status, Ownership, and Digital/Physical must match the names in your database exactly.<br>
+        You can export from Google Sheets as CSV and adjust the column names if needed.
+    </div>
+    <a href="/collection" class="btn btn-secondary">Back to Collection</a>
+</div>
+{% endblock %}

@@ -1,0 +1,1 @@
+This folder contains templates for admin management pages (platforms, statuses, ownerships, digital/physical).

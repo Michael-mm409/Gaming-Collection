@@ -1,0 +1,1 @@
+This folder contains templates for game add/edit/import and game-related views.

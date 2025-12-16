@@ -1,0 +1,89 @@
+{% extends 'base/base.html' %}
+{% block title %}Edit Peripheral{% endblock %}
+{% block head %}
+<script>
+// Store last viewed platform in a cookie when coming from collection
+document.addEventListener('DOMContentLoaded', function() {
+    // Set cookie if platform is present in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const platform = urlParams.get('platform_name') || '{{ peripheral.platform.name if peripheral.platform else "" }}';
+    if (platform) {
+        document.cookie = `last_platform=${platform}; path=/; max-age=2592000`;
+    }
+    // Back button uses cookie
+    document.getElementById('back-to-collection').addEventListener('click', function(e) {
+        e.preventDefault();
+        let platform = '';
+        document.cookie.split(';').forEach(function(cookie) {
+            const [k, v] = cookie.trim().split('=');
+            if (k === 'last_platform') platform = v;
+        });
+        if (platform) {
+            window.location.href = `/collection/${decodeURIComponent(platform)}`;
+        } else {
+            window.location.href = '/collection';
+        }
+    });
+});
+</script>
+{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2>Edit Peripheral</h2>
+    <form method="post">
+        <div class="mb-3">
+            <label>Name</label>
+            <input type="text" name="name" class="form-control" value="{{ peripheral.name or '' }}">
+        </div>
+        <div class="mb-3">
+            <label>Peripheral Type</label>
+            <select name="peripheral_type" class="form-control">
+                <option value="">Peripheral Type</option>
+                <option value="Console" {% if peripheral.peripheral_type == 'Console' %}selected{% endif %}>Console</option>
+                <option value="Controller" {% if peripheral.peripheral_type == 'Controller' %}selected{% endif %}>Controller</option>
+                <option value="Charger" {% if peripheral.peripheral_type == 'Charger' %}selected{% endif %}>Charger</option>
+                <option value="Headphones" {% if peripheral.peripheral_type == 'Headphones' %}selected{% endif %}>Headphones</option>
+                <option value="Storage" {% if peripheral.peripheral_type == 'Storage' %}selected{% endif %}>Storage</option>
+                <option value="Cable" {% if peripheral.peripheral_type == 'Cable' %}selected{% endif %}>Cable</option>
+                <option value="Adapter" {% if peripheral.peripheral_type == 'Adapter' %}selected{% endif %}>Adapter</option>
+                <option value="Other" {% if peripheral.peripheral_type == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>Platform</label>
+            <select name="platform_id" class="form-control" required>
+                {% for platform in platforms %}
+                <option value="{{ platform.id }}" {% if peripheral.platform_id == platform.id %}selected{% endif %}>{{ platform.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>Cost</label>
+            <input type="number" step="0.01" name="cost" class="form-control" value="{{ peripheral.cost or '' }}">
+        </div>
+        <div class="mb-3">
+            <label>Quantity</label>
+            <input type="number" name="quantity" class="form-control" value="{{ peripheral.quantity or '' }}">
+        </div>
+        <div class="mb-3">
+            <label>Purchased From</label>
+            <input type="text" name="purchased_from" class="form-control" value="{{ peripheral.purchased_from or '' }}">
+        </div>
+        <div class="mb-3">
+            <label>Ownership</label>
+            <select name="ownership_id" class="form-control">
+                <option value="">Ownership</option>
+                {% for ownership in ownerships %}
+                <option value="{{ ownership.id }}" {% if peripheral.ownership_id == ownership.id %}selected{% endif %}>{{ ownership.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>Notes</label>
+            <input type="text" name="notes" class="form-control" value="{{ peripheral.notes or '' }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="#" class="btn btn-secondary" id="back-to-collection">Cancel</a>
+    </form>
+</div>
+{% endblock %}

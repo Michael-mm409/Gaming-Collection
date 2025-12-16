@@ -1,0 +1,1 @@
+This folder contains templates for peripheral add/edit and peripheral-related views.
