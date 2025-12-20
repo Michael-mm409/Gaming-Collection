@@ -1,14 +1,18 @@
 # Gaming Collection Manager
 
+## Description
+
 A web application for managing video game collections, platforms, peripherals, and related data. Built with Python and Flask, using Alembic for database migrations.
 
 ## Features
+
 - Manage games, platforms (consoles), and peripherals
 - Admin dashboard for digital/physical status, ownership, and more
 - Database migrations with Alembic
 - Responsive web interface with HTML templates and custom CSS
 
 ## Project Structure
+
 - `src/` — Application source code (Flask app, models, routes)
 - `migrations/` — Alembic migration scripts for database schema
 - `templates/` — HTML templates for admin, dashboard, games, peripherals, and platforms
@@ -17,6 +21,7 @@ A web application for managing video game collections, platforms, peripherals, a
 - `Dockerfile`, `docker-compose.yml` — Containerization and deployment
 
 ## Setup
+
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
@@ -31,6 +36,7 @@ A web application for managing video game collections, platforms, peripherals, a
    ```
 
 ## Development
+
 - Use Alembic for database migrations:
   ```bash
   alembic revision --autogenerate -m "Your message"
