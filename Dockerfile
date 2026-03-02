@@ -10,5 +10,7 @@ COPY templates ./templates
 COPY static ./static
 
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app/src
 
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5050", "app:create_app()"]
+# Correct Gunicorn command, remove invalid nginx options
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5050", "src.app.main:create_app()"]

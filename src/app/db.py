@@ -1,3 +1,1 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+# Moved to app/core/database.py

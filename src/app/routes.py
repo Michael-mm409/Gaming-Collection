@@ -1,7 +1,6 @@
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from .models import Game, Category, Peripheral, Platform
-from .db import db
+from models import Game, Category, Peripheral, Platform
+from core.database import db
 import csv
 from io import TextIOWrapper
 from sqlalchemy import func
@@ -208,8 +207,6 @@ def dashboard(platform_name=None):
 @bp.route('/reset_db', methods=['GET', 'POST'])
 def reset_db():
     if request.method == 'POST':
-        # Delete all rows from Game, Peripheral, and Category
-        from .models import Game, Peripheral, Category
         db.session.query(Game).delete()
         db.session.query(Peripheral).delete()
         db.session.query(Category).delete()
@@ -633,7 +630,6 @@ def delete_peripheral(peripheral_id):
 # Peripherals: dedicated route for listing and adding peripherals
 @bp.route('/peripherals', methods=['GET', 'POST'])
 def peripherals():
-    from .models import Peripheral, Category, Platform
     ownerships = db.session.query(Category).filter_by(type='ownership').all()
     platforms = db.session.query(Platform).order_by(Platform.name.asc()).all()
     if request.method == 'POST':
